@@ -2,6 +2,7 @@ from django.db import models
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from django.contrib.auth import get_user_model
+from django.utils.text import slugify
 
 User = get_user_model()
 # Create your models here.
@@ -30,15 +31,32 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
-class SubCategory(Category):
+
+class SubCategory(models.Model):
     """Модель подкатегории."""
 
+    name = models.CharField(
+        max_length=120,
+        verbose_name='Наименование'
+    )
+    slug = models.SlugField(
+        max_length=120,
+        verbose_name='Слаг'
+    )
+    image = models.ImageField(
+        upload_to='images/',
+        verbose_name='Изображение'
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
         null=False,
-        related_name='Subcategorys'
+        related_name='subcategories'
     )
 
     class Meta:
@@ -48,10 +66,23 @@ class SubCategory(Category):
     def __str__(self):
         return f"{self.name}"
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
-class Product(Category):
+
+class Product(models.Model):
     """Модель продукта."""
 
+    name = models.CharField(
+        max_length=120,
+        verbose_name='Наименование'
+    )
+    slug = models.SlugField(
+        max_length=120,
+        verbose_name='Слаг'
+    )
     price = models.DecimalField(
         blank=False,
         verbose_name='Цена',
@@ -64,6 +95,10 @@ class Product(Category):
         on_delete=models.CASCADE,
         null=False,
         related_name='products'
+    )
+    image = models.ImageField(
+        upload_to='images/',
+        verbose_name='Изображение'
     )
     image_small = ImageSpecField(
         source='image',
@@ -84,6 +119,11 @@ class Product(Category):
 
     def __str__(self):
         return f"{self.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
 
 class ShoppingCart(models.Model):
