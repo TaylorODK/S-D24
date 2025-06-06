@@ -116,3 +116,10 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     def get_count(self, obj):
         return ShoppingCart.objects.filter(user=obj.user, product=obj.product).count()
+
+    def get_price(self, obj):
+        products = ShoppingCart.objects.filter(user=obj.user)
+        price = 0
+        for product in products:
+            price += product.price
+        return price
